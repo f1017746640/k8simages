@@ -1,1 +1,1 @@
-FROM k8s.gcr.io/traefik:3.1
+FROM k8s.gcr.io/traefik:1.7.3
