@@ -4,21 +4,22 @@
 ip=$(ifconfig |grep eth0 -A 1|grep -oP '(?<=inet )[\d\.]+(?=\s)')
 echo ${ip}
 if [ ${ip}x = '10.10.0.170'x ];then
-    echo "set hostname k8s-master"
-    hostnamectl set-hostname k8s-master
+    echo "set hostname k8s-master-01"
+    hostnamectl set-hostname k8s-master-01
 
 elif [ ${ip}x = '10.10.0.171'x ];then
-    echo "set hostname k8s-node1"
-    hostnamectl set-hostname k8s-node1
+    echo "set hostname k8s-master-02"
+    hostnamectl set-hostname k8s-master-02
 
 elif [ ${ip}x = '10.10.0.172'x ];then
-    echo "set hostname k8s-node2"
-    hostnamectl set-hostname k8s-node2
+    echo "set hostname k8s-master-03"
+    hostnamectl set-hostname k8s-master-03
 fi
 
-echo "10.10.0.170  k8s-master" >> /etc/hosts
-echo "10.10.0.171  k8s-node1" >> /etc/hosts
-echo "10.10.0.172  k8s-node2" >> /etc/hosts
+echo "10.10.0.170  k8s-master-01" >> /etc/hosts
+echo "10.10.0.171  k8s-master-02" >> /etc/hosts
+echo "10.10.0.172  k8s-master-03" >> /etc/hosts
+echo "10.10.0.190  k8s-node-01" >> /etc/hosts
 
 
 # 2 关闭防火墙
@@ -42,15 +43,6 @@ net.ipv4.ip_forward = 1
 vm.swappiness=0
 EOF
 sysctl -p /etc/sysctl.d/k8s.conf > /dev/null
-
-#6 添加hosts
-cat >/etc/hosts <<EOF
-127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
-::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-10.10.0.170 k8s-master
-10.10.0.171 k8s-node1
-10.10.0.172 k8s-node2
-EOF
 
 #7 修改本机时区及时间同步
 rm -rf /etc/localtime
