@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# 1 修改主机名, 并写入hosts文件中
+#1 修改主机名, 并写入hosts文件中
 ip=$(ifconfig |grep eth0 -A 1|grep -oP '(?<=inet )[\d\.]+(?=\s)')
 echo ${ip}
 if [ ${ip}x = '10.10.0.170'x ];then
@@ -22,11 +22,11 @@ echo "10.10.0.172  k8s-master-03" >> /etc/hosts
 echo "10.10.0.190  k8s-node-01" >> /etc/hosts
 
 
-# 2 关闭防火墙
+#2 关闭防火墙
 systemctl stop firewalld
 systemctl disable firewalld
 
-# 3 关闭selinux
+#3 关闭selinux
 setenforce 0
 sed -i 's#SELINUX=enforcing#SELINUX=disabled#g' /etc/selinux/config
 sed -i '/^SELINUX=/c SELINUX=disabled/' /etc/sysconfig/selinux
@@ -44,12 +44,12 @@ vm.swappiness=0
 EOF
 sysctl -p /etc/sysctl.d/k8s.conf > /dev/null
 
-#7 修改本机时区及时间同步
+#6 修改本机时区及时间同步
 rm -rf /etc/localtime
 ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 echo "*/10 * * * * /usr/sbin/ntpdate -u ntpxdl.tcwyun.com">> /var/spool/cron/root
 
-#8 安装所需软已经docker ce
+#7 安装所需软已经docker ce
 yum install epel-release tmux mysql lrzsz -y
 yum remove docker \
                   docker-client \
@@ -72,7 +72,7 @@ yum-config-manager \
 
 yum install -y docker-ce-18.06.1.ce -y
 
-#9 安装kubelet kubeadm kubectl
+#8 安装kubelet kubeadm kubectl
 cat <<EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
@@ -84,12 +84,15 @@ gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors
 EOF
 
 yum install kubelet kubeadm kubectl -y
+systemctl enable kubelet
+systemctl enable docker
+systemctl restart kubelet
+systemctl restart kubelet
 
-# keepalived安装
+#9 keepalived安装
 yum install keepalived -y
-\cp -rf keepalived.conf /etc/keepalived/keepalived.conf
 systemctl restart keepalived
 systemctl enable keepalived
 
-#8 重启服务器
+#10 重启服务器
 reboot
